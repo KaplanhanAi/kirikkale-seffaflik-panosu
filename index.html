@@ -138,26 +138,28 @@
 
   <div class="view" id="v6">
     <div class="card" style="background:#3a2c12;border-color:#6b5220">
-      <div style="font-size:11.5px;color:#f5d9a0"><b>Kapsam uyarısı:</b> Bu sekmedeki personel ve detaylı gider verileri <b>yalnızca Kırıkkale (merkez) Belediyesi</b>'ne aittir (kaynak: belediye faaliyet raporları). Diğer sekmelerdeki bütçe verileri ise <b>il genelindeki tüm mahalli idareler</b> toplamıdır — iki kapsam birbirine karıştırılmamalıdır.</div>
+      <div style="font-size:11.5px;color:#f5d9a0"><b>Kapsam uyarısı:</b> Bu sekmedeki personel ve detaylı gider verileri <b>yalnızca Kırıkkale (merkez) Belediyesi</b>'ne aittir (kaynak: belediye faaliyet raporları, gerçekleşme). Diğer sekmelerdeki bütçe verileri <b>il genelindeki tüm mahalli idareler</b> toplamıdır. Detaylı gider kırılımı <b>2021–2025</b>, personel <b>2009–2013 ve 2020–2025</b> için mevcuttur. Üstteki <b>Başkanlık Dönemi</b> seçicisi bu sekmeyi de süzer.</div>
     </div>
     <div class="kpis" style="margin-top:10px">
       <div class="kpi"><div class="t">Personel Sayısı (belediye kadrosu)</div><div class="v" id="p_tot">—</div><div class="d" id="p_tot_d"></div></div>
       <div class="kpi"><div class="t">Şirket Personeli</div><div class="v" id="p_sir">—</div><div class="d" id="p_sir_d"></div></div>
-      <div class="kpi"><div class="t">Personel Gideri (merkez bel.)</div><div class="v" id="p_gid">—</div><div class="d">personel + SGK primi</div></div>
+      <div class="kpi"><div class="t">Mal ve Hizmet Alım Gideri</div><div class="v" id="p_mh">—</div><div class="d" id="p_mh_d"></div></div>
       <div class="kpi"><div class="t">Kişi Başı Personel Maliyeti</div><div class="v" id="p_bir">—</div><div class="d" id="p_bir_d"></div></div>
     </div>
-    <div class="grid" style="grid-template-columns:1.25fr 1fr">
-      <div class="card"><h3>Personel Sayısı — İstihdam Biçimine Göre</h3><div class="cwrap"><canvas id="cPers"></canvas></div>
-        <div style="font-size:10px;color:var(--muted);margin-top:4px">2014–2019 faaliyet raporları belediye sitesinde yayımlanmadığından bu yıllar eksiktir; belediyeden talep edilmelidir.</div></div>
+    <div class="card"><h3><span>Mal ve Hizmet Alım Giderleri — Alt Kırılım (9 kalem)</span><span class="yb" id="mhRange"></span></h3>
+      <div class="cwrap" style="height:300px"><canvas id="cMH"></canvas></div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px">Ekonomik sınıflandırma 2. düzey (03.01–03.09). Alt kalem toplamları ana kalemle birebir doğrulanmıştır.</div></div>
+    <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:10px">
+      <div class="card"><h3><span>Mal/Hizmet Alt Kalem Payı</span><span class="yb" id="mhYear"></span></h3><div class="cwrap sm"><canvas id="cMHPie"></canvas></div></div>
+      <div class="card"><h3><span>Ana Gider Kalemleri</span><span class="yb" id="anaRange"></span></h3><div class="cwrap sm"><canvas id="cAna"></canvas></div></div>
+    </div>
+    <div class="grid" style="grid-template-columns:1.25fr 1fr;margin-top:10px">
+      <div class="card"><h3><span>Personel Sayısı — İstihdam Biçimine Göre</span><span class="yb" id="persRange"></span></h3><div class="cwrap"><canvas id="cPers"></canvas></div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px" id="persNote"></div></div>
       <div class="card"><h3>Kadro + Şirket Personeli</h3><div class="cwrap"><canvas id="cPersSir"></canvas></div></div>
     </div>
-    <div class="card" style="margin-top:10px"><h3>Detaylı Gider Kırılımı — Merkez Belediye (2024 ↔ 2025 gerçekleşme)</h3>
-      <div class="cwrap" style="height:340px"><canvas id="cDetay"></canvas></div></div>
-    <div class="grid" style="grid-template-columns:1fr 1.2fr;margin-top:10px">
-      <div class="card"><h3>Fonksiyonel Sınıflandırma — 2025</h3><div class="cwrap sm"><canvas id="cFonk"></canvas></div></div>
-      <div class="card"><h3>Alt Kalem Tablosu (Ekonomik 2. Düzey)</h3>
-        <div style="overflow-x:auto;max-height:220px"><table id="detayTable"></table></div></div>
-    </div>
+    <div class="card" style="margin-top:10px"><h3><span>Detaylı Gider Matrisi (Ana + Alt Kalem)</span><span class="yb" id="matRange"></span></h3>
+      <div style="overflow-x:auto;max-height:300px"><table id="detayTable"></table></div></div>
     <div class="card" style="margin-top:10px"><h3>Denetim Notu</h3><div class="story" id="persStory">—</div></div>
   </div>
 
@@ -328,31 +330,66 @@ const ys=document.getElementById("yearSel");
 function fillYears(){ ys.innerHTML=""; YL().forEach(y=>{const o=document.createElement("option");o.value=y;o.textContent=y;ys.appendChild(o);}); if(!YL().includes(focus))focus=YL()[YL().length-1]; ys.value=focus; }
 fillYears();
 ys.addEventListener("change",e=>{focus=+e.target.value;renderAll();});
-document.getElementById("term").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;term=b.dataset.t;setOn("term",b);fillYears();renderAll();});
+document.getElementById("term").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;term=b.dataset.t;setOn("term",b);fillYears();renderAll();renderPers();});
 document.getElementById("cur").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;cur=b.dataset.c;if(cur!=="TRY"){reel=false;setOn("reel",document.querySelector('#reel [data-r="0"]'));}setOn("cur",b);renderAll();});
 document.getElementById("reel").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(cur!=="TRY"&&b.dataset.r==="1")return;reel=b.dataset.r==="1";setOn("reel",b);renderAll();});
 document.querySelector(".tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("on"));b.classList.add("on");document.querySelectorAll(".view").forEach(v=>v.classList.remove("on"));document.getElementById(b.dataset.v).classList.add("on");setTimeout(()=>{Object.values(charts).forEach(c=>c.resize());},30);});
 function setOn(id,btn){document.querySelectorAll("#"+id+" button").forEach(x=>x.classList.remove("on"));btn.classList.add("on");}
-const PD = {"years": [2009, 2010, 2011, 2012, 2013, 2020, 2021, 2022, 2023, 2024, 2025], "pers": {"2009": [359, 744, 17, 1120], "2010": [347, 635, 21, 1003], "2011": [330, 253, 30, 613], "2012": [315, 251, 36, 602], "2013": [338, 253, 40, 631], "2020": [364, 194, 5, 563], "2021": [354, 181, 5, 540], "2022": [345, 170, 4, 519], "2023": [336, 143, 2, 481], "2024": [333, 97, 2, 432], "2025": [322, 79, 1, 402]}, "sirket": {"2023": 688, "2024": 755, "2025": 752}, "detay": [["01", "", "PERSONEL GİDERLERİ", 379495049.58, 414242322.2], ["01", "01", "Memurlar", 225630599.01, 294654009.62], ["01", "03", "İşçiler", 149389288.74, 112963507.77], ["01", "05", "Diğer Personel", 4475161.83, 6624804.81], ["02", "", "SGK DEVLET PRİMİ GİDERLERİ", 45986078.07, 51096895.89], ["02", "01", "Memurlar", 24931800.63, 32053056.57], ["02", "03", "İşçiler", 21054277.44, 19043839.32], ["03", "", "MAL VE HİZMET ALIM GİDERLERİ", 1248956964.6, 1815915277.7], ["03", "01", "Üretime yönelik mal ve malzeme alımları", 27759233.42, 70817552.76], ["03", "02", "Tüketime yönelik mal ve malzeme alımları", 341091536.97, 427016031.57], ["03", "03", "Yolluklar", 778470.23, 709851.8], ["03", "04", "Görev giderleri", 242386115.55, 278565765.22], ["03", "05", "Hizmet alımları", 560896709.88, 966498507.8], ["03", "06", "Temsil ve tanıtma giderleri", 2415210.0, 1002280.0], ["03", "07", "Menkul mal, gayrimaddi hak alım, bakım ve onarım", 21069835.2, 33590613.69], ["03", "08", "Gayrimenkul mal bakım ve onarım giderleri", 51531758.15, 36872760.26], ["03", "09", "Tedavi ve cenaze giderleri", 1028095.2, 841914.6], ["04", "", "FAİZ GİDERLERİ", 47438171.31, 64068718.82], ["05", "", "CARİ TRANSFERLER", 51981225.97, 92672966.03], ["06", "", "SERMAYE GİDERLERİ", 24182396.68, 29224159.33], ["06", "01", "Mamul mal alımları", 2037480.0, 421731.0], ["06", "05", "Gayrimenkul sermaye üretim giderleri", 22144916.68, 28802428.33]], "fonk": [["Genel Kamu Hizmetleri", 1357837154.17], ["Kamu Düzeni ve Güvenlik", 138573193.02], ["Ekonomik İşler ve Hizmetler", 374824423.94], ["Çevre Koruma", 134459446.73], ["İskan ve Toplum Refahı", 281104096.62], ["Sağlık", 6670838.62], ["Dinlenme Kültür ve Din", 173751186.87]]};
-function fmtTL(v){ if(Math.abs(v)>=1e9) return "₺"+(v/1e9).toLocaleString("tr-TR",{maximumFractionDigits:2})+"Mr";
+const PD = {"ad": {"01": "Personel Giderleri", "01.01": "Memurlar", "01.03": "İşçiler", "01.05": "Diğer Personel", "02": "SGK Devlet Primi", "02.01": "Memurlar (SGK)", "02.03": "İşçiler (SGK)", "03": "Mal ve Hizmet Alım Giderleri", "03.01": "Üretime yönelik mal/malzeme", "03.02": "Tüketime yönelik mal/malzeme", "03.03": "Yolluklar", "03.04": "Görev giderleri", "03.05": "Hizmet alımları", "03.06": "Temsil ve tanıtma", "03.07": "Menkul mal/bakım-onarım", "03.08": "Gayrimenkul bakım-onarım", "03.09": "Tedavi ve cenaze", "04": "Faiz Giderleri", "05": "Cari Transferler", "06": "Sermaye Giderleri", "06.01": "Mamul mal alımları", "06.05": "Gayrimenkul sermaye üretim"}, "det": {"2021": {"01": 58809153.96, "01.01": 33449242.38, "01.03": 24480636.09, "01.05": 879275.49, "02": 10131923.84, "02.01": 5546950.26, "02.03": 4584973.58, "03": 146428620.08, "03.01": 6442775.84, "03.02": 52709024.49, "03.03": 36870.44, "03.04": 4759748.13, "03.05": 64428707.3, "03.06": 222021.5, "03.07": 3932742.88, "03.08": 13837816.9, "03.09": 58912.6, "04": 7024822.44, "05": 10189956.41}, "2022": {"01": 88216358.93, "01.01": 54193203.14, "01.03": 32660515.32, "01.05": 1362640.47, "02": 14808222.26, "02.01": 8661762.13, "02.03": 6146460.13, "03": 363948485.85, "03.01": 28378548.86, "03.02": 186878298.15, "03.03": 55774.41, "03.04": 20983921.7, "03.05": 100223245.47, "03.06": 547470.4, "03.07": 10694188.1, "03.08": 16033629.9, "03.09": 153408.86, "04": 7609472.11, "05": 16791328.19}, "2023": {"01": 168098461.4, "01.01": 102806908.7, "01.03": 62890043.86, "01.05": 2401508.84, "02": 24734119.55, "02.01": 14664839.86, "02.03": 10069279.69, "03": 693429936.06, "03.01": 34064878.84, "03.02": 249266996.6, "03.03": 354419.68, "03.04": 44660197.45, "03.05": 253885205.2, "03.06": 1459492.0, "03.07": 19539281.63, "03.08": 88309652.86, "03.09": 1889811.8, "04": 14469990.62}, "2024": {"01": 379495049.58, "01.01": 225630599.01, "01.03": 149389288.74, "01.05": 4475161.83, "02": 45986078.07, "02.01": 24931800.63, "02.03": 21054277.44, "03": 1248956964.6, "03.01": 27759233.42, "03.02": 341091536.97, "03.03": 778470.23, "03.04": 242386115.55, "03.05": 560896709.88, "03.06": 2415210.0, "03.07": 21069835.2, "03.08": 51531758.15, "03.09": 1028095.2, "04": 47438171.31, "05": 51981225.97, "06": 24182396.68, "06.01": 2037480.0, "06.05": 22144916.68}, "2025": {"01": 414242322.2, "01.01": 294654009.62, "01.03": 112963507.77, "01.05": 6624804.81, "02": 51096895.89, "02.01": 32053056.57, "02.03": 19043839.32, "03": 1815915277.7, "03.01": 70817552.76, "03.02": 427016031.57, "03.03": 709851.8, "03.04": 278565765.22, "03.05": 966498507.8, "03.06": 1002280.0, "03.07": 33590613.69, "03.08": 36872760.26, "03.09": 841914.6, "04": 64068718.82, "05": 92672966.03, "06": 29224159.33, "06.01": 421731.0, "06.05": 28802428.33}}, "pers": {"2009": [359, 744, 17, 1120], "2010": [347, 635, 21, 1003], "2011": [330, 253, 30, 613], "2012": [315, 251, 36, 602], "2013": [338, 253, 40, 631], "2020": [364, 194, 5, 563], "2021": [354, 181, 5, 540], "2022": [345, 170, 4, 519], "2023": [336, 143, 2, 481], "2024": [333, 97, 2, 432], "2025": [322, 79, 1, 402]}, "sirket": {"2023": 688, "2024": 755, "2025": 752}, "fonk": [["Genel Kamu Hizmetleri", 1357837154.17], ["Kamu Düzeni ve Güvenlik", 138573193.02], ["Ekonomik İşler ve Hizmetler", 374824423.94], ["Çevre Koruma", 134459446.73], ["İskan ve Toplum Refahı", 281104096.62], ["Sağlık", 6670838.62], ["Dinlenme Kültür ve Din", 173751186.87]]};
+const MH=["03.01","03.02","03.03","03.04","03.05","03.06","03.07","03.08","03.09"];
+const ANA=["01","02","03","04","05","06"];
+const DYEARS=Object.keys(PD.det).map(Number).sort();
+const PYEARS=Object.keys(PD.pers).map(Number).sort();
+function inTerm(y){ if(term==="all") return true; return TERMS[term].years.includes(y) || (term==="t0"&&y<=2013) || (term==="t1"&&y>=2014&&y<=2018) || (term==="t2"&&y>=2019&&y<=2023) || (term==="t3"&&y>=2024); }
+function fmtTL(v){ if(v===null||v===undefined||v==="") return "—";
+ if(Math.abs(v)>=1e9) return "₺"+(v/1e9).toLocaleString("tr-TR",{maximumFractionDigits:2})+"Mr";
  if(Math.abs(v)>=1e6) return "₺"+(v/1e6).toLocaleString("tr-TR",{maximumFractionDigits:1})+"M";
  return "₺"+Math.round(v).toLocaleString("tr-TR"); }
-function renderPers(){
-  const py=PD.years, sirYears=Object.keys(PD.sirket).map(Number).sort();
-  const last=py[py.length-1];
-  const pl=PD.pers[last];
-  document.getElementById("p_tot").textContent=pl[3].toLocaleString("tr-TR")+" kişi";
-  document.getElementById("p_tot_d").textContent=last+" · memur "+pl[0]+" / işçi "+pl[1]+" / sözl. "+pl[2];
-  const sir=PD.sirket[last];
-  document.getElementById("p_sir").textContent=sir?sir.toLocaleString("tr-TR")+" kişi":"—";
-  document.getElementById("p_sir_d").textContent=sir?("kadro+şirket: "+(pl[3]+sir).toLocaleString("tr-TR")):"veri yok";
-  const pg25=PD.detay.find(r=>r[0]==="01"&&r[1]==="")[4]+PD.detay.find(r=>r[0]==="02"&&r[1]==="")[4];
-  const pg24=PD.detay.find(r=>r[0]==="01"&&r[1]==="")[3]+PD.detay.find(r=>r[0]==="02"&&r[1]==="")[3];
-  document.getElementById("p_gid").textContent=fmtTL(pg25);
-  const bir25=pg25/pl[3], bir24=pg24/PD.pers[2024][3];
-  document.getElementById("p_bir").textContent=fmtTL(bir25);
-  document.getElementById("p_bir_d").textContent="2024: "+fmtTL(bir24)+" → "+(((bir25-bir24)/bir24*100)>=0?"▲ +":"▼ ")+((bir25-bir24)/bir24*100).toFixed(1)+"%";
+const gv=(y,k)=>{const d=PD.det[String(y)]; return d?d[k]:undefined;};
 
+function renderPers(){
+  const dy=DYEARS.filter(inTerm), py=PYEARS.filter(inTerm);
+  const rng=a=>a.length?(a.length===1?a[0]:a[0]+"–"+a[a.length-1]):"veri yok";
+  ["mhRange","anaRange","matRange"].forEach(id=>document.getElementById(id).textContent=rng(dy));
+  document.getElementById("persRange").textContent=rng(py);
+  const lastD=dy.length?dy[dy.length-1]:null, lastP=py.length?py[py.length-1]:null;
+  document.getElementById("mhYear").textContent=lastD?("Yıl: "+lastD):"veri yok";
+  document.getElementById("persNote").textContent = py.length? "Gösterilen yıllar: "+py.join(", ")+" · 2014–2019 raporları yayımlanmadığından eksiktir." : "Bu dönem için yayımlanmış personel verisi yok (2014–2019 raporları mevcut değil).";
+
+  // KPI
+  if(lastP){const p=PD.pers[lastP];
+    document.getElementById("p_tot").textContent=p[3].toLocaleString("tr-TR")+" kişi";
+    document.getElementById("p_tot_d").textContent=lastP+" · memur "+p[0]+" / işçi "+p[1]+" / sözl. "+p[2];
+    const sir=PD.sirket[lastP];
+    document.getElementById("p_sir").textContent=sir?sir.toLocaleString("tr-TR")+" kişi":"—";
+    document.getElementById("p_sir_d").textContent=sir?("kadro+şirket: "+(p[3]+sir).toLocaleString("tr-TR")):"şirket verisi yok";
+  } else {["p_tot","p_sir"].forEach(i=>document.getElementById(i).textContent="—");
+    document.getElementById("p_tot_d").textContent="bu dönemde veri yok";document.getElementById("p_sir_d").textContent="";}
+  if(lastD){
+    const mh=gv(lastD,"03"), prev=dy.length>1?gv(dy[dy.length-2],"03"):null;
+    document.getElementById("p_mh").textContent=fmtTL(mh);
+    document.getElementById("p_mh_d").innerHTML=lastD+(prev?(" · <span class='"+(mh>=prev?"down":"up")+"'>"+(mh>=prev?"▲ +":"▼ ")+((mh-prev)/prev*100).toFixed(0)+"%</span> (öy)"):"");
+    const pg=(gv(lastD,"01")||0)+(gv(lastD,"02")||0);
+    const pc=PD.pers[lastD]?PD.pers[lastD][3]:null;
+    document.getElementById("p_bir").textContent=pc?fmtTL(pg/pc):"—";
+    document.getElementById("p_bir_d").textContent=pc?(lastD+" · personel+SGK / "+pc+" kişi"):"personel sayısı yok";
+  } else {["p_mh","p_bir"].forEach(i=>document.getElementById(i).textContent="—");
+    document.getElementById("p_mh_d").textContent="bu dönemde detay veri yok";document.getElementById("p_bir_d").textContent="";}
+
+  const AXn=Object.assign({},AX,{ticks:{color:"#9db2c8",font:{size:10},callback:v=>fmtTL(v)}});
+  // Mal/Hizmet yığılmış
+  mk("cMH",{type:"bar",data:{labels:dy,datasets:MH.map((k,i)=>({label:PD.ad[k],data:dy.map(y=>gv(y,k)||0),backgroundColor:COL[i%COL.length],stack:"m"}))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#cfe0f0",font:{size:9.5},boxWidth:10}},tooltip:{callbacks:{label:c=>c.dataset.label+": "+fmtTL(c.parsed.y)}}},
+      scales:{x:Object.assign({stacked:true},AX),y:Object.assign({stacked:true},AXn)}}});
+  // Mal/Hizmet pay (son yıl)
+  const pieData=lastD?MH.map(k=>gv(lastD,k)||0):[];
+  mk("cMHPie",{type:"doughnut",data:{labels:MH.map(k=>PD.ad[k]),datasets:[{data:pieData,backgroundColor:COL}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"right",labels:{color:"#cfe0f0",font:{size:9},boxWidth:9}},tooltip:{callbacks:{label:c=>c.label+": "+fmtTL(c.parsed)}}}}});
+  // Ana kalemler
+  mk("cAna",{type:"bar",data:{labels:dy,datasets:ANA.map((k,i)=>({label:PD.ad[k],data:dy.map(y=>gv(y,k)||0),backgroundColor:COL[i%COL.length],stack:"a"}))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#cfe0f0",font:{size:9.5},boxWidth:10}},tooltip:{callbacks:{label:c=>c.dataset.label+": "+fmtTL(c.parsed.y)}}},
+      scales:{x:Object.assign({stacked:true},AX),y:Object.assign({stacked:true},AXn)}}});
+  // Personel
   mk("cPers",{type:"bar",data:{labels:py,datasets:[
     {label:"Memur",data:py.map(y=>PD.pers[y][0]),backgroundColor:"#4c94d8",stack:"s"},
     {label:"Kadrolu İşçi",data:py.map(y=>PD.pers[y][1]),backgroundColor:"#f5a623",stack:"s"},
@@ -360,33 +397,25 @@ function renderPers(){
     {label:"Toplam",type:"line",data:py.map(y=>PD.pers[y][3]),borderColor:"#3ecf8e",pointRadius:3,tension:.3,fill:false}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#cfe0f0",font:{size:10},boxWidth:11}},tooltip:{callbacks:{label:c=>c.dataset.label+": "+c.parsed.y+" kişi"}}},
       scales:{x:Object.assign({stacked:true},AX),y:Object.assign({stacked:true},AX,{ticks:{color:"#9db2c8",font:{size:10},callback:v=>v+" kişi"}})}}});
-
-  mk("cPersSir",{type:"bar",data:{labels:sirYears,datasets:[
-    {label:"Belediye kadrosu",data:sirYears.map(y=>PD.pers[y][3]),backgroundColor:"#4c94d8",stack:"t"},
-    {label:"Şirket personeli",data:sirYears.map(y=>PD.sirket[y]),backgroundColor:"#e0714f",stack:"t"}]},
+  const sy=Object.keys(PD.sirket).map(Number).filter(inTerm).sort();
+  mk("cPersSir",{type:"bar",data:{labels:sy,datasets:[
+    {label:"Belediye kadrosu",data:sy.map(y=>PD.pers[y][3]),backgroundColor:"#4c94d8",stack:"t"},
+    {label:"Şirket personeli",data:sy.map(y=>PD.sirket[y]),backgroundColor:"#e0714f",stack:"t"}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#cfe0f0",font:{size:10},boxWidth:11}},tooltip:{callbacks:{label:c=>c.dataset.label+": "+c.parsed.y+" kişi"}}},
       scales:{x:Object.assign({stacked:true},AX),y:Object.assign({stacked:true},AX,{ticks:{color:"#9db2c8",font:{size:10},callback:v=>v+" kişi"}})}}});
-
-  const ana=PD.detay.filter(r=>r[1]==="");
-  mk("cDetay",{type:"bar",data:{labels:ana.map(r=>r[2]),datasets:[
-    {label:"2024",data:ana.map(r=>r[3]),backgroundColor:"#4c94d8"},
-    {label:"2025",data:ana.map(r=>r[4]),backgroundColor:"#f5a623"}]},
-    options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#cfe0f0",font:{size:10}}},tooltip:{callbacks:{label:c=>c.dataset.label+": "+fmtTL(c.parsed.x)}}},
-      scales:{x:Object.assign({},AX,{ticks:{color:"#9db2c8",font:{size:10},callback:v=>fmtTL(v)}}),y:Object.assign({},AX,{ticks:{color:"#cfe0f0",font:{size:9.5}}})}}});
-
-  mk("cFonk",{type:"doughnut",data:{labels:PD.fonk.map(r=>r[0]),datasets:[{data:PD.fonk.map(r=>r[1]),backgroundColor:COL}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"right",labels:{color:"#cfe0f0",font:{size:9.5},boxWidth:10}},tooltip:{callbacks:{label:c=>c.label+": "+fmtTL(c.parsed)}}}}});
-
-  const alt=PD.detay.filter(r=>r[1]!=="");
-  document.getElementById("detayTable").innerHTML="<thead><tr><th>Kod</th><th>Alt Kalem</th><th class=\"num\">2024</th><th class=\"num\">2025</th><th class=\"num\">Δ</th></tr></thead><tbody>"+
-   alt.map(r=>{const d=r[3]?((r[4]-r[3])/r[3]*100):null;
-    return "<tr><td>"+r[0]+"."+r[1]+"</td><td>"+r[2]+"</td><td class=\"num\">"+fmtTL(r[3])+"</td><td class=\"num\">"+fmtTL(r[4])+"</td><td class=\"num\">"+(d===null?"—":(d>=0?"+":"")+d.toFixed(0)+"%")+"</td></tr>";}).join("")+"</tbody>";
-
-  const hiz=PD.detay.find(r=>r[0]==="03"&&r[1]==="05");
+  // Matris
+  const order=["01","01.01","01.03","01.05","02","02.01","02.03","03"].concat(MH).concat(["04","05","06","06.01","06.05"]);
+  let html="<thead><tr><th>Kod</th><th>Kalem</th>"+dy.map(y=>"<th class='num'>"+y+"</th>").join("")+"</tr></thead><tbody>";
+  html+=order.map(k=>{const ana='.' in {}?false:(k.indexOf('.')<0);
+    return "<tr"+(ana?" class='tot'":"")+"><td>"+k+"</td><td>"+(PD.ad[k]||k)+"</td>"+dy.map(y=>"<td class='num'>"+fmtTL(gv(y,k))+"</td>").join("")+"</tr>";}).join("");
+  html+="</tbody>";
+  document.getElementById("detayTable").innerHTML=html;
+  // Not
+  const h25=gv(2025,"03.05"), h21=gv(2021,"03.05");
   document.getElementById("persStory").innerHTML=
-    "<b>Personel ve gider yapısı — Kırıkkale merkez Belediyesi.</b><br>"+
-    "Belediye kadrosundaki personel 2009'da <b>1.120</b> kişiden 2025'te <b>402</b> kişiye gerilemiştir; buna karşılık <b>şirket personeli 2025'te 752</b> kişidir (kadro+şirket toplam <b>1.154</b>). Bu, istihdamın kadrodan şirkete kaydığını gösterir ve gider tarafında <b>hizmet alımları</b> kalemini büyütür: 2025'te hizmet alımları <b>"+fmtTL(hiz[4])+"</b> ile toplam giderin en büyük tek alt kalemidir (2024: "+fmtTL(hiz[3])+", artış %"+(((hiz[4]-hiz[3])/hiz[3])*100).toFixed(0)+").<br>"+
-    "<b>Bulgu:</b> 2013 faaliyet raporundaki 2012 personel tablosunda bileşenler toplamı 602 iken tablo toplamı 587 olarak yazılmıştır (15 kişilik tutarsızlık). 2020–2021'de 1 kişilik fark iş yeri hekiminden kaynaklanmaktadır.<br>"+
+    "<b>Personel ve mal/hizmet gider yapısı — Kırıkkale merkez Belediyesi.</b><br>"+
+    "Belediye kadrosu 2009'da <b>1.120</b> kişiden 2025'te <b>402</b> kişiye gerilerken <b>şirket personeli 752</b> kişiye ulaşmıştır (kadro+şirket <b>1.154</b>). İstihdamın kadrodan şirkete kayması gider tarafında <b>hizmet alımları (03.05)</b> kalemini büyütmüştür: 2021'de "+fmtTL(h21)+" olan hizmet alımları 2025'te <b>"+fmtTL(h25)+"</b> olmuştur (nominal <b>"+((h25/h21-1)*100).toFixed(0)+"%</b> artış) ve tek başına mal/hizmet giderlerinin <b>%"+(h25/gv(2025,"03")*100).toFixed(0)+"</b>'ini oluşturmaktadır.<br>"+
+    "<b>Bulgu:</b> 2013 faaliyet raporundaki 2012 personel tablosunda bileşen toplamı 602, tablo toplamı 587'dir (15 kişi tutarsızlık). 2020–2021'de 1 kişilik fark iş yeri hekiminden kaynaklanır.<br>"+
     "<i>Bu değerlendirme ayrıca uzman hukukçu/mali müşavir tarafından teyit edilmelidir.</i>";
 }
 
