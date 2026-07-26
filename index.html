@@ -202,7 +202,7 @@ function mk(id,cfg){ if(charts[id]) charts[id].destroy(); charts[id]=new Chart(d
 
 function renderKPI(){
   const y=focus,dn=DATA.denge[y],py=y-1,has=DATA.denge[py];
-  document.querySelectorAll(".yb1").forEach(e=>e.textContent=y+" · "+TERMS[termOf(y)].label);
+  document.querySelectorAll(".yb1").forEach(e=>e.textContent="Yıl: "+y);
   document.getElementById("k_gelir").textContent=short(conv(dn.gelir,y));
   document.getElementById("k_gider").textContent=short(conv(dn.gider,y));
   document.getElementById("k_denge").textContent=(dn.denge>=0?"+":"")+short(conv(dn.denge,y));
