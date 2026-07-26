@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kırıkkale Şeffaflık Panosu — 14 Yıl (2012–2025)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{--bg:#0b1522;--panel:#14263a;--panel2:#1b3350;--line:#2b445f;
+    --ink:#eaf1f8;--muted:#9db2c8;--accent:#f5a623;--accent2:#4c94d8;--good:#3ecf8e;--bad:#ef5b6b;--chip:#213750;--purple:#9b7bd4;--teal:#37b6a8}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Calibri,system-ui,Arial,sans-serif;background:#070f19;color:var(--ink);padding:14px;font-size:13px}
+  .wrap{max-width:1240px;margin:0 auto}
+  .src{font-size:11px;color:var(--muted);text-align:center;margin-bottom:8px}
+  .topbar{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 16px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+  .brand h1{font-size:18px;font-weight:700}
+  .brand small{color:var(--muted);font-size:11px}
+  .controls{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .grp{display:flex;flex-direction:column;gap:4px}
+  .grp .lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+  .seg{display:flex;background:var(--chip);border-radius:8px;padding:3px;gap:3px;flex-wrap:wrap}
+  .seg button{background:transparent;border:0;color:var(--muted);padding:5px 10px;border-radius:6px;cursor:pointer;font-size:11.5px;font-weight:600}
+  .seg button.on{background:var(--accent2);color:#fff}
+  .cur .seg button.on{background:var(--accent);color:#20140a}
+  .reel .seg button.on{background:var(--good);color:#07231a}
+  .term .seg button.on{background:var(--purple);color:#fff}
+  .tabs{display:flex;gap:6px;margin:12px 0 0;flex-wrap:wrap}
+  .tabs button{background:var(--panel);border:1px solid var(--line);color:var(--muted);padding:9px 15px;border-radius:9px 9px 0 0;cursor:pointer;font-weight:600;font-size:12.5px}
+  .tabs button.on{background:var(--panel2);color:#fff;border-bottom:3px solid var(--accent)}
+  .view{display:none;background:var(--panel2);border:1px solid var(--line);border-radius:0 11px 11px 11px;padding:12px}
+  .view.on{display:block}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  .kpi .t{font-size:10.5px;color:var(--muted)}
+  .kpi .v{font-size:20px;font-weight:800;margin:4px 0}
+  .kpi .d{font-size:10.5px;font-weight:700}
+  .up{color:var(--good)}.down{color:var(--bad)}
+  .grid{display:grid;gap:10px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+  .card h3{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px;display:flex;justify-content:space-between}
+  .card h3 .yb{color:var(--accent);font-weight:800}
+  .cwrap{position:relative;height:230px}
+  .cwrap.sm{height:190px}
+  table{width:100%;border-collapse:collapse;font-size:11px}
+  th,td{text-align:left;padding:5px 7px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600;font-size:9.5px;text-transform:uppercase}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  tr.tot td{font-weight:800;border-top:2px solid var(--accent)}
+  .story{background:#fff;color:#12233a;border-radius:9px;padding:12px;font-size:12.5px;line-height:1.55}
+  .story b{color:#0d47a1}
+  .foot{margin-top:14px;color:var(--muted);font-size:10.5px;line-height:1.6;text-align:center}
+  .pill{display:inline-block;background:var(--chip);border:1px solid var(--line);border-radius:20px;padding:2px 9px;margin:2px;font-size:10px}
+  @media(max-width:860px){.kpis{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="src">Kırıkkale ili — mahalli idareler bütçesi 2012–2025 (Muhasebat GM) · Nüfus & Yİ-ÜFE: TÜİK · Kur: gösterge (dönem sonu) · Yerel seçim: 30.03.2014 / 31.03.2019 / 31.03.2024</div>
+
+  <div class="topbar">
+    <div class="brand"><h1>Kırıkkale Şeffaflık Panosu</h1><small>Kırıkkale ili mahalli idareler · 14 yıllık gerçek bütçe verisi</small></div>
+    <div class="controls">
+      <div class="grp term"><span class="lbl">Başkanlık Dönemi</span>
+        <div class="seg" id="term">
+          <button data-t="all" class="on">Tüm Yıllar</button>
+          <button data-t="t0">2009–2014</button>
+          <button data-t="t1">2014–2019</button>
+          <button data-t="t2">2019–2024</button>
+          <button data-t="t3">2024–2029</button></div></div>
+      <div class="grp"><span class="lbl">Odak Yıl</span>
+        <select id="yearSel" style="background:var(--chip);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:6px 8px;font-size:12px"></select></div>
+      <div class="grp cur"><span class="lbl">Para Birimi</span>
+        <div class="seg" id="cur">
+          <button data-c="TRY" class="on">₺ TL</button><button data-c="USD">$ USD</button>
+          <button data-c="EUR">€ EUR</button><button data-c="XAU">🔶 Altın</button></div></div>
+      <div class="grp reel"><span class="lbl">Değer</span>
+        <div class="seg" id="reel"><button data-r="0" class="on">Nominal</button><button data-r="1" id="reelBtn">Reel · ÜFE</button></div></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="on" data-v="v1">Genel Bakış</button>
+    <button data-v="v2">Gider Analizi</button>
+    <button data-v="v3">Gelir Analizi</button>
+    <button data-v="v4">Reel & Kişi Başı</button>
+    <button data-v="v5">Dönem Karşılaştırma</button>
+  </div>
+
+  <div class="view on" id="v1">
+    <div class="kpis">
+      <div class="kpi"><div class="t">Bütçe Gelirleri</div><div class="v" id="k_gelir">—</div><div class="d" id="k_gelir_d"></div></div>
+      <div class="kpi"><div class="t">Bütçe Giderleri</div><div class="v" id="k_gider">—</div><div class="d" id="k_gider_d"></div></div>
+      <div class="kpi"><div class="t">Bütçe Dengesi</div><div class="v" id="k_denge">—</div><div class="d" id="k_denge_d"></div></div>
+      <div class="kpi"><div class="t">Kişi Başı Gider</div><div class="v" id="k_kisi">—</div><div class="d" id="k_kisi_d"></div></div>
+    </div>
+    <div class="grid" style="grid-template-columns:1.3fr 1fr">
+      <div class="card"><h3>Gelir · Gider Trendi + Başkanlık Dönemleri</h3><div class="cwrap"><canvas id="cTrend"></canvas></div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px">Renkli bantlar başkanlık dönemleridir. Bir yıla tıkla → KPI/kırılım o yıla odaklanır.</div></div>
+      <div class="card"><h3>Bütçe Dengesi (Yıllık)</h3><div class="cwrap"><canvas id="cDenge"></canvas></div></div>
+    </div>
+    <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:10px">
+      <div class="card"><h3><span>Gider Kırılımı</span><span class="yb yb1"></span></h3><div class="cwrap sm"><canvas id="cGiderDonut"></canvas></div></div>
+      <div class="card"><h3><span>Gelir Kırılımı</span><span class="yb yb1"></span></h3><div class="cwrap sm"><canvas id="cGelirDonut"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="view" id="v2">
+    <div class="card"><h3>Gider Kompozisyonu — Ekonomik Kalem (yığılmış)</h3><div class="cwrap" style="height:300px"><canvas id="cGiderStack"></canvas></div></div>
+    <div class="card" style="margin-top:10px"><h3>Gider Kalemleri — Yıl Bazında Matris</h3>
+      <div style="overflow-x:auto"><table><thead id="mHead"></thead><tbody id="mBody"></tbody></table></div></div>
+  </div>
+
+  <div class="view" id="v3">
+    <div class="card"><h3>Gelir Kompozisyonu — Kaynak (yığılmış)</h3><div class="cwrap" style="height:300px"><canvas id="cGelirStack"></canvas></div></div>
+    <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:10px">
+      <div class="card"><h3><span>Gelir Kaynak Payı</span><span class="yb yb1"></span></h3><div class="cwrap sm"><canvas id="cGelirPie"></canvas></div></div>
+      <div class="card"><h3>Vergi Geliri / Toplam Gelir (%)</h3><div class="cwrap sm"><canvas id="cVergiPay"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="view" id="v4">
+    <div class="grid" style="grid-template-columns:1fr 1fr">
+      <div class="card"><h3 id="reelTitle">Toplam Gider — Nominal vs Reel</h3><div class="cwrap"><canvas id="cReel"></canvas></div></div>
+      <div class="card"><h3>Kişi Başı Gider (seçili birim)</h3><div class="cwrap"><canvas id="cKisi"></canvas></div></div>
+    </div>
+    <div class="card" style="margin-top:10px"><h3>Analiz Özeti</h3><div class="story" id="story">—</div></div>
+  </div>
+
+  <div class="view" id="v5">
+    <div class="card"><h3>Başkanlık Dönemleri Karşılaştırması (yıllık ortalama)</h3><div class="cwrap" style="height:260px"><canvas id="cTermBar"></canvas></div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px">2024–2029 dönemi yalnızca 2024–2025 bütçe yıllarını içerir (devam ediyor). Seçili para birimi/reel moduna göre.</div></div>
+    <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:10px">
+      <div class="card"><h3>Dönem Özet Tablosu</h3><div style="overflow-x:auto"><table id="termTable"></table></div></div>
+      <div class="card"><h3>Dönem Değerlendirmesi</h3><div class="story" id="termStory">—</div></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div>
+      <span class="pill">Dönem · Para birimi · Nominal/Reel(ÜFE) · Odak yıl seçicileri tüm görselleri süzer</span>
+      <span class="pill">Yıla tıkla → çapraz filtre</span>
+      <span class="pill">Reel = en son yıl fiyatına Yİ-ÜFE ile indirgeme</span>
+    </div>
+    <div style="margin-top:6px">Dönem eşlemesi (seçim mart sonu → seçim yılı yeni yönetime sayılır): 2012–2013 (2009–2014, kısmi), 2014–2018 (2014–2019), 2019–2023 (2019–2024), 2024–2025 (2024–2029, devam ediyor).</div>
+    <div style="margin-top:6px">Kapsam: Kırıkkale ilindeki tüm mahalli idareler (merkez + ilçe belediyeleri + il özel idare). Kur oranları göstergedir; nihai panoda TCMB resmi kuru bağlanır. İhale/borç verisi bekleniyor. 2026 yılı henüz kısmi (yıl içi) olduğundan dahil edilmemiştir.</div>
+    <div style="margin-top:6px">CF Eğitim Danışmanlık ve Organizasyon Ltd. Şti. — Belediye Şeffaflık ve Hesap Verebilirlik Projesi</div>
+  </div>
+</div>
+
+<script>
+const DATA = {"years": [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], "gc": ["Personel", "SGK Dev. Primi", "Mal ve Hizmet", "Faiz", "Cari Transfer", "Sermaye (Yatırım)", "Sermaye Transfer", "Borç Verme"], "lc": ["Vergi", "Teşebbüs-Mülkiyet", "Bağış-Yardım", "Faiz-Pay-Ceza", "Sermaye Geliri", "Alacak Tahsilat"], "gider": {"2012": [60651, 10063, 96433, 6382, 7304, 70031, 123, 0], "2013": [66984, 11470, 112219, 5427, 8389, 104369, 330, 0], "2014": [70323, 11949, 104481, 6297, 6874, 77531, 947, 0], "2015": [78912, 13540, 132584, 9199, 6904, 80464, 193, 0], "2016": [93565, 16301, 135523, 6738, 8938, 56827, 2288, 0], "2017": [97615, 17193, 165203, 7005, 14706, 130976, 410, 0], "2018": [107467, 18401, 191599, 7104, 23265, 126357, 396, 0], "2019": [131189, 22915, 207249, 16873, 19915, 91136, 652, 0], "2020": [130602, 19619, 229770, 17166, 20962, 100123, 975, 0], "2021": [147392, 22585, 351607, 22457, 30529, 136891, 615, 0], "2022": [227691, 35816, 944053, 20966, 57791, 1088291, 1002, 0], "2023": [473451, 61457, 1409715, 36515, 122490, 794039, 1826, 0], "2024": [1023660, 119869, 2002812, 74399, 200296, 1358548, 2850, 0], "2025": [1259785, 144812, 2984583, 105039, 355651, 985593, 20135, 0]}, "gelir": {"2012": [28074, 48224, 80848, 82832, 4177, 0], "2013": [32940, 51208, 93232, 102343, 1415, 0], "2014": [36413, 55723, 79271, 127739, 5380, 0], "2015": [36122, 62459, 102513, 158029, 5337, 0], "2016": [40564, 64692, 46097, 165863, 3441, 0], "2017": [45883, 71466, 78382, 197866, 6121, 0], "2018": [45499, 67804, 94132, 236012, 5870, 0], "2019": [48707, 83515, 87143, 255706, 4522, 0], "2020": [60245, 81023, 93925, 298915, 6737, 0], "2021": [70338, 76054, 239576, 403239, 62624, 0], "2022": [90476, 226443, 417726, 748665, 97380, 0], "2023": [153279, 363475, 987668, 1350277, 154602, 0], "2024": [228599, 524492, 1054779, 2563803, 31617, 0], "2025": [375690, 671796, 831404, 3957213, 249151, 0]}, "nufus": {"2012": 274727, "2013": 274658, "2014": 271092, "2015": 270271, "2016": 277984, "2017": 278749, "2018": 286602, "2019": 283017, "2020": 278703, "2021": 275968, "2022": 277046, "2023": 285744, "2024": 283053, "2025": 282830}, "ufe": {"2012": 207.29, "2013": 221.74, "2014": 235.84, "2015": 249.31, "2016": 274.09, "2017": 316.48, "2018": 422.94, "2019": 454.08, "2020": 568.27, "2021": 1022.25, "2022": 2021.19, "2023": 2915.02, "2024": 3746.52, "2025": 4783.04}, "denge": {"2012": {"gelir": 244155, "gider": 250987, "denge": -6832}, "2013": {"gelir": 281138, "gider": 309188, "denge": -28050}, "2014": {"gelir": 304526, "gider": 278402, "denge": 26124}, "2015": {"gelir": 364460, "gider": 321796, "denge": 42664}, "2016": {"gelir": 320657, "gider": 320180, "denge": 477}, "2017": {"gelir": 399718, "gider": 433108, "denge": -33390}, "2018": {"gelir": 449317, "gider": 474589, "denge": -25272}, "2019": {"gelir": 479593, "gider": 489929, "denge": -10336}, "2020": {"gelir": 540845, "gider": 519217, "denge": 21628}, "2021": {"gelir": 851831, "gider": 712076, "denge": 139755}, "2022": {"gelir": 1580690, "gider": 2375610, "denge": -794920}, "2023": {"gelir": 3009301, "gider": 2899493, "denge": 109808}, "2024": {"gelir": 4403290, "gider": 4782434, "denge": -379144}, "2025": {"gelir": 6085254, "gider": 5855598, "denge": 229656}}};
+const RATE = {
+  TRY:{2012:1,2013:1,2014:1,2015:1,2016:1,2017:1,2018:1,2019:1,2020:1,2021:1,2022:1,2023:1,2024:1,2025:1},
+  USD:{2012:1.78,2013:2.13,2014:2.33,2015:2.92,2016:3.52,2017:3.79,2018:5.29,2019:5.95,2020:7.43,2021:13.30,2022:18.70,2023:29.48,2024:35.30,2025:42.50},
+  EUR:{2012:2.35,2013:2.94,2014:2.83,2015:3.18,2016:3.71,2017:4.55,2018:6.05,2019:6.68,2020:9.09,2021:15.05,2022:19.95,2023:32.60,2024:36.70,2025:49.50},
+  XAU:{2012:96,2013:83,2014:89,2015:100,2016:135,2017:158,2018:220,2019:283,2020:450,2021:800,2022:1075,2023:1930,2024:2900,2025:4300}
+};
+const SYM={TRY:"₺",USD:"$",EUR:"€",XAU:"gr"};
+const COL=["#f5a623","#4c94d8","#9b7bd4","#3ecf8e","#ef5b6b","#8aa0b6","#37b6a8","#e0714f"];
+const YEARS=DATA.years, BASE=YEARS[YEARS.length-1];
+const TERMS={
+  t0:{label:"2009–2014 Dönemi",years:YEARS.filter(y=>y<=2013),color:"rgba(138,160,182,.10)"},
+  t1:{label:"2014–2019 Dönemi",years:YEARS.filter(y=>y>=2014&&y<=2018),color:"rgba(76,148,216,.10)"},
+  t2:{label:"2019–2024 Dönemi",years:YEARS.filter(y=>y>=2019&&y<=2023),color:"rgba(245,166,35,.10)"},
+  t3:{label:"2024–2029 Dönemi",years:YEARS.filter(y=>y>=2024),color:"rgba(155,123,212,.12)"}
+};
+function termOf(y){ return y<=2013?"t0":(y<=2018?"t1":(y<=2023?"t2":"t3")); }
+let cur="TRY", reel=false, focus=BASE, term="all", charts={};
+const YL=()=> term==="all"?YEARS:TERMS[term].years;
+
+function conv(binTL,y){ let tl=binTL*1000; if(reel&&cur==="TRY") tl=tl*DATA.ufe[BASE]/DATA.ufe[y]; if(cur==="TRY") return tl; return tl/RATE[cur][y]; }
+function short(v){const s=SYM[cur],a=Math.abs(v);
+  if(cur==="XAU"){if(a>=1e6)return (v/1e6).toLocaleString("tr-TR",{maximumFractionDigits:1})+" kg";return Math.round(v).toLocaleString("tr-TR")+" gr";}
+  if(a>=1e9)return s+(v/1e9).toLocaleString("tr-TR",{maximumFractionDigits:2})+"Mr";
+  if(a>=1e6)return s+(v/1e6).toLocaleString("tr-TR",{maximumFractionDigits:1})+"M";
+  if(a>=1e3)return s+(v/1e3).toLocaleString("tr-TR",{maximumFractionDigits:0})+"B";
+  return s+Math.round(v).toLocaleString("tr-TR");}
+const giderTot=y=>DATA.denge[y].gider, gelirTot=y=>DATA.denge[y].gelir;
+const AX={grid:{color:"rgba(255,255,255,.06)"},ticks:{color:"#9db2c8",font:{size:10}}};
+function baseOpts(extra){return Object.assign({responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{labels:{color:"#cfe0f0",font:{size:10},boxWidth:12}},
+    tooltip:{callbacks:{label:c=>c.dataset.label+": "+short(c.parsed.y!=null?c.parsed.y:c.parsed)}}},
+  scales:{x:AX,y:Object.assign({},AX,{ticks:{color:"#9db2c8",font:{size:10},callback:v=>short(v)}})}},extra||{});}
+function pct(a,b){if(!b)return "";const p=(a-b)/Math.abs(b)*100;return (p>=0?"▲ +":"▼ ")+p.toFixed(1)+"%";}
+
+const bandPlugin={id:"bands",beforeDatasetsDraw(chart){
+  const yl=YL(); if(yl.length<2) return;
+  const {ctx,chartArea:ca,scales:{x}}=chart;
+  const groups=term==="all"?["t0","t1","t2","t3"]:[term];
+  groups.forEach(tid=>{
+    const ys=TERMS[tid].years.filter(y=>yl.includes(y)); if(!ys.length) return;
+    const i0=yl.indexOf(ys[0]), i1=yl.indexOf(ys[ys.length-1]);
+    let x0=x.getPixelForValue(yl[i0]), x1=x.getPixelForValue(yl[i1]);
+    const half=(x.getPixelForValue(yl[Math.min(i1+1,yl.length-1)])-x1)||18;
+    const left=Math.max(ca.left,x0-Math.abs(half)/2), right=Math.min(ca.right,x1+Math.abs(half)/2);
+    ctx.save(); ctx.fillStyle=TERMS[tid].color; ctx.fillRect(left,ca.top,right-left,ca.bottom-ca.top);
+    ctx.fillStyle="rgba(207,224,240,.65)"; ctx.font="700 9px Segoe UI"; ctx.textAlign="center";
+    ctx.fillText(TERMS[tid].label.replace(" Dönemi",""),(left+right)/2,ca.top+11); ctx.restore();
+  });
+}};
+function mk(id,cfg){ if(charts[id]) charts[id].destroy(); charts[id]=new Chart(document.getElementById(id),cfg); }
+
+function renderKPI(){
+  const y=focus,dn=DATA.denge[y],py=y-1,has=DATA.denge[py];
+  document.querySelectorAll(".yb1").forEach(e=>e.textContent=y+" · "+TERMS[termOf(y)].label);
+  document.getElementById("k_gelir").textContent=short(conv(dn.gelir,y));
+  document.getElementById("k_gider").textContent=short(conv(dn.gider,y));
+  document.getElementById("k_denge").textContent=(dn.denge>=0?"+":"")+short(conv(dn.denge,y));
+  const kt=dn.gider*1000/DATA.nufus[y]; let kv=kt; if(reel&&cur==="TRY")kv=kt*DATA.ufe[BASE]/DATA.ufe[y]; if(cur!=="TRY")kv=kt/RATE[cur][y];
+  document.getElementById("k_kisi").textContent=cur==="XAU"?kv.toLocaleString("tr-TR",{maximumFractionDigits:1})+" gr":SYM[cur]+Math.round(kv).toLocaleString("tr-TR");
+  document.getElementById("k_denge_d").className="d "+(dn.denge>=0?"up":"down");
+  document.getElementById("k_denge_d").textContent=dn.denge>=0?"Fazla":"Açık";
+  if(has){const ge=document.getElementById("k_gelir_d");ge.textContent=pct(conv(dn.gelir,y),conv(has.gelir,py))+" (öy)";ge.className="d "+(dn.gelir>=has.gelir?"up":"down");
+    const gd=document.getElementById("k_gider_d");gd.textContent=pct(conv(dn.gider,y),conv(has.gider,py))+" (öy)";gd.className="d "+(dn.gider>=has.gider?"down":"up");}
+  else{document.getElementById("k_gelir_d").textContent="";document.getElementById("k_gider_d").textContent="";}
+  document.getElementById("k_kisi_d").textContent="nüfus "+DATA.nufus[y].toLocaleString("tr-TR");
+}
+
+function renderAll(){
+  document.getElementById("reelBtn").textContent="Reel · "+BASE+"₺";
+  document.getElementById("reelTitle").textContent="Toplam Gider — Nominal vs Reel ("+BASE+" fiyatı)";
+  renderKPI();
+  const yl=YL();
+  mk("cTrend",{type:"line",data:{labels:yl,datasets:[
+    {label:"Gelir",data:yl.map(y=>conv(gelirTot(y),y)),borderColor:"#3ecf8e",backgroundColor:"rgba(62,207,142,.10)",fill:true,tension:.3,pointRadius:3},
+    {label:"Gider",data:yl.map(y=>conv(giderTot(y),y)),borderColor:"#f5a623",backgroundColor:"rgba(245,166,35,.08)",fill:true,tension:.3,pointRadius:3}]},
+    options:baseOpts({onClick:(e,el)=>{if(el.length){focus=yl[el[0].index];document.getElementById("yearSel").value=focus;renderAll();}}}),plugins:[bandPlugin]});
+  mk("cDenge",{type:"bar",data:{labels:yl,datasets:[{label:"Denge",data:yl.map(y=>conv(DATA.denge[y].denge,y)),backgroundColor:yl.map(y=>DATA.denge[y].denge>=0?"#3ecf8e":"#ef5b6b")}]},
+    options:baseOpts({plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>short(c.parsed.y)}}},onClick:(e,el)=>{if(el.length){focus=yl[el[0].index];document.getElementById("yearSel").value=focus;renderAll();}}}),plugins:[bandPlugin]});
+  const dOpt={responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"right",labels:{color:"#cfe0f0",font:{size:10},boxWidth:10}},tooltip:{callbacks:{label:c=>c.label+": "+short(c.parsed)}}}};
+  mk("cGiderDonut",{type:"doughnut",data:{labels:DATA.gc,datasets:[{data:DATA.gider[focus].map(v=>conv(v,focus)),backgroundColor:COL}]},options:dOpt});
+  mk("cGelirDonut",{type:"doughnut",data:{labels:DATA.lc.slice(0,5),datasets:[{data:DATA.gelir[focus].slice(0,5).map(v=>conv(v,focus)),backgroundColor:COL}]},options:dOpt});
+  const stOpt=baseOpts({scales:{x:Object.assign({stacked:true},AX),y:Object.assign({stacked:true},AX,{ticks:{color:"#9db2c8",font:{size:10},callback:v=>short(v)}})}});
+  mk("cGiderStack",{type:"bar",data:{labels:yl,datasets:DATA.gc.map((k,i)=>({label:k,data:yl.map(y=>conv(DATA.gider[y][i],y)),backgroundColor:COL[i%COL.length]}))},options:stOpt});
+  mk("cGelirStack",{type:"bar",data:{labels:yl,datasets:DATA.lc.slice(0,5).map((k,i)=>({label:k,data:yl.map(y=>conv(DATA.gelir[y][i],y)),backgroundColor:COL[i%COL.length]}))},options:stOpt});
+  mk("cGelirPie",{type:"pie",data:{labels:DATA.lc.slice(0,5),datasets:[{data:DATA.gelir[focus].slice(0,5).map(v=>conv(v,focus)),backgroundColor:COL}]},options:dOpt});
+  mk("cVergiPay",{type:"line",data:{labels:yl,datasets:[{label:"Vergi payı %",data:yl.map(y=>+(DATA.gelir[y][0]/DATA.denge[y].gelir*100).toFixed(1)),borderColor:"#4c94d8",backgroundColor:"rgba(76,148,216,.12)",fill:true,tension:.3,pointRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>"%"+c.parsed.y}}},scales:{x:AX,y:Object.assign({},AX,{ticks:{color:"#9db2c8",font:{size:10},callback:v=>"%"+v}})}}});
+  const nom=yl.map(y=>giderTot(y)*1000), rl=yl.map(y=>giderTot(y)*1000*DATA.ufe[BASE]/DATA.ufe[y]);
+  const trl=v=>v>=1e9?"₺"+(v/1e9).toFixed(2)+"Mr":"₺"+(v/1e6).toFixed(0)+"M";
+  mk("cReel",{type:"line",data:{labels:yl,datasets:[
+    {label:"Nominal",data:nom,borderColor:"#f5a623",tension:.3,pointRadius:3,fill:false},
+    {label:"Reel ("+BASE+"₺)",data:rl,borderColor:"#3ecf8e",backgroundColor:"rgba(62,207,142,.12)",tension:.3,pointRadius:3,fill:true}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#cfe0f0",font:{size:10}}},tooltip:{callbacks:{label:c=>c.dataset.label+": "+trl(c.parsed.y)}}},scales:{x:AX,y:Object.assign({},AX,{ticks:{color:"#9db2c8",font:{size:10},callback:trl}})}}});
+  mk("cKisi",{type:"line",data:{labels:yl,datasets:[{label:"Kişi başı gider",data:yl.map(y=>{const t=DATA.denge[y].gider*1000/DATA.nufus[y];let v=t;if(reel&&cur==="TRY")v=t*DATA.ufe[BASE]/DATA.ufe[y];if(cur!=="TRY")v=t/RATE[cur][y];return v;}),borderColor:"#9b7bd4",backgroundColor:"rgba(155,123,212,.12)",fill:true,tension:.3,pointRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>cur==="XAU"?Math.round(c.parsed.y)+" gr":SYM[cur]+Math.round(c.parsed.y).toLocaleString("tr-TR")}}},scales:{x:AX,y:Object.assign({},AX,{ticks:{color:"#9db2c8",font:{size:10},callback:v=>cur==="XAU"?Math.round(v)+"gr":short(v)}})}}});
+  renderMatrix(); renderStory(); renderTerm();
+}
+
+function renderMatrix(){
+  const yl=YL();
+  document.getElementById("mHead").innerHTML="<tr><th>Kalem</th>"+yl.map(y=>`<th class="num">${y}</th>`).join("")+"</tr>";
+  let html=DATA.gc.map((k,i)=>`<tr><td>${k}</td>`+yl.map(y=>`<td class="num">${short(conv(DATA.gider[y][i],y))}</td>`).join("")+"</tr>").join("");
+  html+=`<tr class="tot"><td>TOPLAM</td>`+yl.map(y=>`<td class="num">${short(conv(giderTot(y),y))}</td>`).join("")+"</tr>";
+  document.getElementById("mBody").innerHTML=html;
+}
+function renderStory(){
+  const y0=YEARS[0], g0=giderTot(y0),gN=giderTot(BASE),reelN=g0*DATA.ufe[BASE]/DATA.ufe[y0];
+  const nomG=((gN-g0)/g0*100).toFixed(0),reelG=((gN-reelN)/reelN*100).toFixed(0);
+  const usd0=g0*1000/RATE.USD[y0],usdN=gN*1000/RATE.USD[BASE],usdG=((usdN-usd0)/usd0*100).toFixed(0);
+  document.getElementById("story").innerHTML=
+    `<b>Kırıkkale ili mahalli idareler — ${y0}–${BASE} bütçe analizi.</b><br>`+
+    `${y0}→${BASE} toplam gider nominal <b>%${nomG}</b> arttı; Yİ-ÜFE ile ${BASE} fiyatına indirgendiğinde reel artış <b>%${reelG}</b>. `+
+    `USD bazında gider $${(usd0/1e6).toFixed(0)}M → $${(usdN/1e6).toFixed(0)}M (<b>%${usdG}</b>). `+
+    `${focus} yılında en büyük gider kalemi <b>${DATA.gc[DATA.gider[focus].indexOf(Math.max(...DATA.gider[focus]))]}</b>. `+
+    `<i>Kur oranları göstergedir; nihai panoda TCMB resmi kuru bağlanır.</i>`;
+}
+
+function termAgg(tid,kind){const ys=TERMS[tid].years;if(!ys.length)return{sum:0,avg:0,n:0};let s=0;ys.forEach(y=>{const b=kind==="gider"?giderTot(y):kind==="gelir"?gelirTot(y):DATA.denge[y].denge;s+=conv(b,y);});return{sum:s,avg:s/ys.length,n:ys.length};}
+function kbTerm(tid){const ys=TERMS[tid].years;if(!ys.length)return 0;let s=0;ys.forEach(y=>{const t=giderTot(y)*1000/DATA.nufus[y];let v=t;if(reel&&cur==="TRY")v=t*DATA.ufe[BASE]/DATA.ufe[y];if(cur!=="TRY")v=t/RATE[cur][y];s+=v;});return s/ys.length;}
+function renderTerm(){
+  const cmp=["t1","t2","t3"], colors=["#4c94d8","#f5a623","#9b7bd4"];
+  mk("cTermBar",{type:"bar",data:{labels:["Ort. Yıllık Gelir","Ort. Yıllık Gider","Ort. Yıllık Denge"],
+    datasets:cmp.map((t,i)=>({label:TERMS[t].label,data:[termAgg(t,"gelir").avg,termAgg(t,"gider").avg,termAgg(t,"denge").avg],backgroundColor:colors[i]}))},
+    options:baseOpts({plugins:{legend:{labels:{color:"#cfe0f0",font:{size:10}}},tooltip:{callbacks:{label:c=>c.dataset.label+": "+short(c.parsed.y)}}}})});
+  const fmtKB=v=>cur==="XAU"?Math.round(v)+" gr":SYM[cur]+Math.round(v).toLocaleString("tr-TR");
+  const rows=[["Toplam Gider",t=>short(termAgg(t,"gider").sum)],["Ort. Yıllık Gider",t=>short(termAgg(t,"gider").avg)],["Ort. Yıllık Gelir",t=>short(termAgg(t,"gelir").avg)],["Ort. Yıllık Denge",t=>short(termAgg(t,"denge").avg)],["Kişi Başı Gider (ort.)",t=>fmtKB(kbTerm(t))],["Bütçe Yılı Sayısı",t=>TERMS[t].years.length]];
+  let html="<thead><tr><th>Gösterge</th>"+cmp.map(t=>`<th class="num">${TERMS[t].label.replace(" Dönemi","")}</th>`).join("")+`<th class="num">Δ (son iki)</th></tr></thead><tbody>`;
+  html+=rows.map(([lab,fn])=>{
+    const vals=cmp.map(fn);
+    let d="—";
+    if(["Toplam Gider","Ort. Yıllık Gider","Ort. Yıllık Gelir","Kişi Başı Gider (ort.)"].includes(lab)){
+      const a=lab==="Kişi Başı Gider (ort.)"?kbTerm("t2"):(lab==="Ort. Yıllık Gelir"?termAgg("t2","gelir").avg:lab==="Toplam Gider"?termAgg("t2","gider").sum:termAgg("t2","gider").avg);
+      const b=lab==="Kişi Başı Gider (ort.)"?kbTerm("t3"):(lab==="Ort. Yıllık Gelir"?termAgg("t3","gelir").avg:lab==="Toplam Gider"?termAgg("t3","gider").sum:termAgg("t3","gider").avg);
+      d=pct(b,a);
+    }
+    return `<tr><td>${lab}</td>`+vals.map(v=>`<td class="num">${v}</td>`).join("")+`<td class="num">${d}</td></tr>`;
+  }).join("")+"</tbody>";
+  document.getElementById("termTable").innerHTML=html;
+  const ra=(()=>{let s=0;TERMS.t2.years.forEach(y=>s+=giderTot(y)*1000*DATA.ufe[BASE]/DATA.ufe[y]);return s/TERMS.t2.years.length;})();
+  const rb=(()=>{let s=0;TERMS.t3.years.forEach(y=>s+=giderTot(y)*1000*DATA.ufe[BASE]/DATA.ufe[y]);return s/TERMS.t3.years.length;})();
+  const reelChg=((rb-ra)/ra*100).toFixed(0);
+  document.getElementById("termStory").innerHTML=
+    `<b>2019–2024 ↔ 2024–2029 dönemi geçişi.</b><br>`+
+    `2024–2029 döneminde (2024–2025) yıllık ortalama gider, önceki döneme göre nominal <b>${pct(termAgg("t3","gider").avg,termAgg("t2","gider").avg)}</b> değişti. `+
+    `Yİ-ÜFE ile ${BASE} fiyatına indirgenmiş reel ortalama gider <b>%${reelChg}</b> ${reelChg>=0?"arttı":"azaldı"} (₺${(ra/1e6).toFixed(0)}M → ₺${(rb/1e6).toFixed(0)}M). `+
+    `Kişi başı gider dönemler arası <b>${pct(kbTerm("t3"),kbTerm("t2"))}</b> değişmiştir. `+
+    `<i>2024–2029 dönemi devam ediyor (yalnızca 2024–2025); 2009–2014 dönemi 2 bütçe yılı içerdiğinden karşılaştırma tablosunda t1–t2–t3 üzerinden verilmiştir.</i>`;
+}
+
+const ys=document.getElementById("yearSel");
+function fillYears(){ ys.innerHTML=""; YL().forEach(y=>{const o=document.createElement("option");o.value=y;o.textContent=y;ys.appendChild(o);}); if(!YL().includes(focus))focus=YL()[YL().length-1]; ys.value=focus; }
+fillYears();
+ys.addEventListener("change",e=>{focus=+e.target.value;renderAll();});
+document.getElementById("term").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;term=b.dataset.t;setOn("term",b);fillYears();renderAll();});
+document.getElementById("cur").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;cur=b.dataset.c;if(cur!=="TRY"){reel=false;setOn("reel",document.querySelector('#reel [data-r="0"]'));}setOn("cur",b);renderAll();});
+document.getElementById("reel").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(cur!=="TRY"&&b.dataset.r==="1")return;reel=b.dataset.r==="1";setOn("reel",b);renderAll();});
+document.querySelector(".tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("on"));b.classList.add("on");document.querySelectorAll(".view").forEach(v=>v.classList.remove("on"));document.getElementById(b.dataset.v).classList.add("on");setTimeout(()=>{Object.values(charts).forEach(c=>c.resize());},30);});
+function setOn(id,btn){document.querySelectorAll("#"+id+" button").forEach(x=>x.classList.remove("on"));btn.classList.add("on");}
+window.addEventListener("load",renderAll);
+</script>
+</body>
+</html>
